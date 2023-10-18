@@ -1,0 +1,9 @@
+<h1 *ngIf="!!error; else content">{{ error }}</h1>
+
+<ng-template #content>
+    <div *ngFor="let todo of todos$ | async">
+        <p class="container">{{ todo.id }} -- {{ todo.title }} -- {{ todo.order }}</p>
+    </div>
+    <button (click)="createTodo()">+</button>
+    <button (click)="deleteTodo()">-</button>
+</ng-template>

@@ -1,0 +1,11 @@
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <input type="text" formControlName="email" required />
+
+    <div *ngIf="email!.invalid && (email!.dirty || email!.touched)" class="error">
+        <div *ngIf="email!.errors?.['required']">Email is required</div>
+        <div *ngIf="email!.errors?.['pattern']">Email is not correct</div>
+    </div>
+
+    <input type="text" formControlName="password" required />
+    <button type="submit" [disabled]="loginForm.invalid">send</button>
+</form>
