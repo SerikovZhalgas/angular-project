@@ -1,10 +1,9 @@
 import { Injectable } from '@angular/core'
-import { HttpClient, HttpErrorResponse } from '@angular/common/http'
-import { BehaviorSubject, catchError, EMPTY, map } from 'rxjs'
-import { BeautyLoggerService } from '../../core/services/beauty-logger.service'
+import { HttpClient } from '@angular/common/http'
+import { BehaviorSubject, map } from 'rxjs'
 import { environment } from '../../../environments/environment'
 import { Todo } from '../models/todos.model'
-import { BaseResponse } from '../../core/models/core.model'
+import { CommonResponse } from '../../core/models/core.model'
 
 @Injectable({
     providedIn: 'root',
@@ -12,39 +11,23 @@ import { BaseResponse } from '../../core/models/core.model'
 export class TodosService {
     todos$ = new BehaviorSubject<Todo[]>([])
 
-    httpOptions = {
-        withCredentials: true,
-        headers: {
-            'api-key': environment.apiKey,
-        },
-    }
-    constructor(
-        private http: HttpClient,
-        private beautyLoggerService: BeautyLoggerService
-    ) {}
+    constructor(private http: HttpClient) {}
 
     getTodos() {
-        this.http
-            .get<Todo[]>(`${environment.baseUrl}/todo-lists`, this.httpOptions)
-            .pipe(catchError(this.errorHandler.bind(this)))
-            .subscribe(todos => {
-                this.todos$.next(todos)
-            })
+        this.http.get<Todo[]>(`${environment.baseUrl}/todo-lists`).subscribe(todos => {
+            this.todos$.next(todos)
+        })
     }
 
-    createTodo(title: string) {
+    addTodo(title: string) {
         this.http
-            .post<BaseResponse<{ item: Todo }>>(
-                `${environment.baseUrl}/todo-lists`,
-                { title },
-                this.httpOptions
-            )
+            .post<CommonResponse<{ item: Todo }>>(`${environment.baseUrl}/todo-lists`, { title })
             .pipe(
-                catchError(this.errorHandler.bind(this)),
                 map(res => {
-                    const newTodo = res.data.item
                     const stateTodos = this.todos$.getValue()
-                    return [newTodo, ...stateTodos]
+                    const newTodo = res.data.item
+                    const newTodos = [newTodo, ...stateTodos]
+                    return newTodos
                 })
             )
             .subscribe(todos => {
@@ -54,11 +37,11 @@ export class TodosService {
 
     deleteTodo(todoId: string) {
         this.http
-            .delete<BaseResponse>(`${environment.baseUrl}/todo-lists/${todoId}`, this.httpOptions)
+            .delete(`${environment.baseUrl}/todo-lists/${todoId}`)
             .pipe(
-                catchError(this.errorHandler.bind(this)),
-                map(() => {
-                    return this.todos$.getValue().filter(tl => tl.id !== todoId)
+                map(_ => {
+                    const stateTodos = this.todos$.getValue()
+                    return stateTodos.filter(tl => tl.id !== todoId)
                 })
             )
             .subscribe(todos => {
@@ -66,8 +49,21 @@ export class TodosService {
             })
     }
 
-    private errorHandler(err: HttpErrorResponse) {
-        this.beautyLoggerService.log(err.message, 'error')
-        return EMPTY
+    updateTodoTitle(data: { todoId: string; title: string }) {
+        this.http
+            .put<CommonResponse>(`${environment.baseUrl}/todo-lists/${data.todoId}`, {
+                title: data.title,
+            })
+            .pipe(
+                map(_ => {
+                    const stateTodos = this.todos$.getValue()
+                    return stateTodos.map(tl =>
+                        tl.id === data.todoId ? { ...tl, title: data.title } : tl
+                    )
+                })
+            )
+            .subscribe(todos => {
+                this.todos$.next(todos)
+            })
     }
 }

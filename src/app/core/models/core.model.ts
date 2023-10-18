@@ -1,4 +1,4 @@
-export interface BaseResponse<T = NonNullable<unknown>> {
+export interface CommonResponse<T = NonNullable<unknown>> {
     data: T
     messages: string[]
     fieldsErrors: string[]

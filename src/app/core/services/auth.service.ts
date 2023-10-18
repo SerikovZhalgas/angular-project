@@ -11,7 +11,7 @@ export class AuthService {
     constructor(private http: HttpClient) {}
 
     me() {
-        this.http.get<MeResponse>(`${environment.baseNetworkUrl}/auth/me`).subscribe(res => {
+        this.http.get<MeResponse>(`${environment.baseUrl}/auth/me`).subscribe(res => {
             if (res.resultCode === ResultCodes.success) {
                 this.isAuth = true
             }
