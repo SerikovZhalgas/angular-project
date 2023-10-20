@@ -4,3 +4,9 @@ export interface Todo {
     order: number
     title: string
 }
+
+export type FilterType = 'all' | 'active' | 'completed'
+
+export interface DomainTodo extends Todo {
+    filter: FilterType
+}

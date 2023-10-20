@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { NavigationComponent } from './components/navigation/navigation.component'
 import { RouterLink, RouterLinkActive } from '@angular/router'
+import { NotifyComponent } from './components/notify/notify.component'
 
 @NgModule({
-    declarations: [NavigationComponent],
+    declarations: [NotifyComponent],
     imports: [CommonModule, RouterLink, RouterLinkActive],
-    exports: [NavigationComponent],
+    exports: [NotifyComponent],
 })
 export class SharedModule {}
